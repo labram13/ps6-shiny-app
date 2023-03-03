@@ -68,6 +68,7 @@ ui <- fluidPage(
                                                uiOutput("checkboxState")
                                         )
                                       ),
+                                      p("You have selected the following states: \n"),
                                       uiOutput("selected")
                          ),
                          mainPanel(
@@ -91,7 +92,9 @@ ui <- fluidPage(
                                         use abbreviations for states).
                                         )
                                         "),
-                                      uiOutput("checkboxCol")
+                                      uiOutput("checkboxCol"),
+                                      p("The Top 10 states in the current data table are: \n"),
+                                      uiOutput("top10")
                          ),
                          mainPanel(
                            dataTableOutput("table")
@@ -113,14 +116,6 @@ server <- function(input, output){
     student_loans %>% 
       head(5)
   })
-  output$ex2 <- DT::renderDataTable(
-    DT::datatable(
-      plt, options = list(
-        lengthMenu = list(c(5, 15, -1), c('5', '15', 'All')),
-        pageLength = 15
-      )
-    )
-  )
   output$checkboxState <- renderUI({
     selectizeInput(
       "State", strong("Select State or Type State abbr. e.g. WA"),
@@ -173,8 +168,18 @@ server <- function(input, output){
     )
   })
   output$selected <- renderUI({
-    HTML(paste0("You have selected the following the state: ", input$State, sep ="<br/>"))
+    HTML(paste(input$State, sep ="<br/>"))
     })
+  output$top10 <- renderText({
+    if (is.null(input$choose)){
+      y = plt %>% head(10)
+      paste(y$State, sep=",")
+    } else {
+      x = loan_table()
+      y = x %>% head(10)
+      paste(y$State)
+    }
+  })
 }
 
 shinyApp(ui = ui, server = server)
