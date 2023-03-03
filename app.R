@@ -24,8 +24,8 @@ ui <- fluidPage(
                                          p(),
                                          tags$p(
                                            HTML("This dataset contains", nrow(student_loans), 
-                                           "<strong>rows</strong> and", ncol(student_loans), 
-                                           "<strong>columns</strong>.")),
+                                                "<strong>rows</strong> and", ncol(student_loans), 
+                                                "<strong>columns</strong>.")),
                                          p("Here is a table of a few sample data
                                            to understand how the dataset is 
                                            sorted out."),
@@ -67,14 +67,15 @@ ui <- fluidPage(
                                         column(6,
                                                uiOutput("checkboxState")
                                         )
-                                      )
+                                      ),
+                                      uiOutput("selected")
                          ),
                          mainPanel(
                            plotOutput("plot"),
                            textOutput("result")
                          )
                        )
-                     ),
+              ),
               tabPanel("Table",
                        sidebarLayout(
                          sidebarPanel(h3(strong("Table of Averages:\n")),
@@ -90,7 +91,7 @@ ui <- fluidPage(
                                         use abbreviations for states).
                                         )
                                         "),
-                           uiOutput("checkboxCol")
+                                      uiOutput("checkboxCol")
                          ),
                          mainPanel(
                            dataTableOutput("table")
@@ -132,11 +133,11 @@ server <- function(input, output){
       filter(State %in% input$State)
   })
   output$plot <- renderPlot ({
-      ggplot(data = sample()) +
+    ggplot(data = sample()) +
       geom_col(aes(x = forcats::fct_reorder(State, desc(avg_loan)), 
                    y = avg_loan, fill = State ),
                labels =scales::comma
-               ) +
+      ) +
       scale_y_continuous(labels = scales::comma) +
       theme(legend.position="none")+
       labs(title = "Average Loans Taken Out By Students per State",
@@ -148,10 +149,10 @@ server <- function(input, output){
     max <- sample() %>% 
       pull(avg_loan) %>% 
       max()
-  if(is.infinite(max))
-    paste("Please select some states to start showing showing data.")
-  else
-    ""
+    if(is.infinite(max))
+      paste("Please select some states to start showing showing data.")
+    else
+      ""
   })
   loan_table <- reactive({
     plt  %>% 
@@ -171,6 +172,9 @@ server <- function(input, output){
       choices =  c("avg_loan")
     )
   })
+  output$selected <- renderUI({
+    HTML(paste0("You have selected the following the state: ", input$State, sep ="<br/>"))
+    })
 }
 
 shinyApp(ui = ui, server = server)
